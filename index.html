@@ -28,7 +28,10 @@ button:disabled{opacity:.3}
 #jk{position:absolute;width:90px;height:90px;border:1px solid #4a463e;border-radius:50%;display:none}
 #jk i{position:absolute;left:30px;top:30px;width:30px;height:30px;border-radius:50%;background:#4a463e}
 .tb{touch-action:none;position:absolute;right:14px;min-width:0;padding:12px 14px;font-size:13px;pointer-events:auto;z-index:2;border-radius:6px}
-select{background:#111;color:#b9b3a6;border:1px solid #4a463e;padding:6px;font:inherit}#bt{position:absolute;left:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);font-size:12px;opacity:.85}#bt b{font-weight:400;display:block}#bt u{display:block;width:80px;height:6px;border:1px solid #6d685e;margin:3px 0;text-decoration:none}#bt i{display:block;height:100%}.cr{display:none}body.car .cr{display:block}button small{display:block;font-size:12px;opacity:.7;margin-top:4px;max-width:250px;white-space:normal}#xh{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:rgba(200,190,170,.7)}#am{position:absolute;left:14px;bottom:calc(env(safe-area-inset-bottom) + 58px);font-size:12px;opacity:.85}#mb{position:absolute;top:calc(env(safe-area-inset-top) + 50px);left:50%;transform:translateX(-50%);width:min(240px,40vw);opacity:0;transition:opacity .3s;font-size:11px;text-align:center}#mb u{display:block;height:6px;border:1px solid #6d685e;text-decoration:none;margin-top:3px}#mb i{display:block;height:100%;background:#b32222}#tm{position:fixed;top:calc(env(safe-area-inset-top) + 44px);left:50%;transform:translateX(-50%);font-size:11px;text-align:center;pointer-events:none;z-index:5;display:none;text-shadow:0 0 6px #000;line-height:1.5}</style></head><body>
+select{background:#111;color:#b9b3a6;border:1px solid #4a463e;padding:6px;font:inherit}#bt{position:absolute;left:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);font-size:12px;opacity:.85}#bt b{font-weight:400;display:block}#bt u{display:block;width:80px;height:6px;border:1px solid #6d685e;margin:3px 0;text-decoration:none}#bt i{display:block;height:100%}.cr{display:none}body.car .cr{display:block}button small{display:block;font-size:12px;opacity:.7;margin-top:4px;max-width:250px;white-space:normal}#xh{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:rgba(200,190,170,.7)}#am{position:absolute;left:14px;bottom:calc(env(safe-area-inset-bottom) + 58px);font-size:12px;opacity:.85}#mb{position:absolute;top:calc(env(safe-area-inset-top) + 50px);left:50%;transform:translateX(-50%);width:min(240px,40vw);opacity:0;transition:opacity .3s;font-size:11px;text-align:center}#mb u{display:block;height:6px;border:1px solid #6d685e;text-decoration:none;margin-top:3px}#mb i{display:block;height:100%;background:#b32222}#tm{position:fixed;top:calc(env(safe-area-inset-top) + 44px);left:50%;transform:translateX(-50%);font-size:11px;text-align:center;pointer-events:none;z-index:5;display:none;text-shadow:0 0 6px #000;line-height:1.5}
+#miniMapBox{position:fixed;right:10px;top:calc(env(safe-area-inset-top) + 10px);width:clamp(104px,29vw,164px);aspect-ratio:1;z-index:7;display:none;pointer-events:none;border:1px solid rgba(201,178,122,.75);border-radius:7px;background:rgba(0,0,0,.82);box-shadow:0 2px 12px #0009;overflow:hidden}
+#miniMap{width:100%;height:100%;display:block}
+#miniMapLabel{position:absolute;left:5px;top:3px;font-size:9px;letter-spacing:1px;color:#c9b27a;text-shadow:0 1px 3px #000}</style></head><body>
 <canvas id="c"></canvas><div id="vig"></div><div id="slit"></div><div id="fade"></div>
 <div id="hud"><div id="obj"></div><div id="inv"><span>Chave de Contenção</span><span>Fusível de Alta Tensão</span><span>Fragmento de Acesso</span></div><div id="bt"><b id="btt"></b><u><i id="bti"></i></u><span id="bts"></span></div><div id="pr"></div><div id="tt"></div><div id="sb"><i id="sbi"></i></div><div id="xh" class="cr"></div><div id="am" class="cr"></div><div id="mb" class="cr"><span>A CRIATURA</span><u><i id="mbi"></i></u></div></div>
 <div id="tc"><div id="lz"></div><div id="tz"></div><div id="jk"><i></i></div>
@@ -427,7 +430,24 @@ $('bMp').onclick=()=>{mpSt('');show('mpm')};$('bMx').onclick=()=>show('menu');$(
 $('bCp').onclick=()=>{try{navigator.clipboard.writeText(MP.code)}catch(e){}if(navigator.share)navigator.share({text:'Entre na minha sala do Labirinto: '+MP.code}).catch(()=>{});$('bCp').textContent='Código: '+MP.code};
 $('c').addEventListener('pointerdown',()=>{if(state=='spec')MP.sp++});$('lz').addEventListener('pointerdown',()=>{if(state=='spec')MP.sp++});
 // ---------- loop ----------
-let prev=0,sv=0;
+let prev=0,sv=0,miniTick=0;
+function drawMiniMap(dt){
+ const box=$('miniMapBox');
+ const visible=!!(MP.on&&MP.go&&(state==='play'||state==='spec'||state==='dying'));
+ box.style.display=visible?'block':'none';if(!visible)return;
+ miniTick-=dt;if(miniTick>0)return;miniTick=.12;
+ const cv=$('miniMap'),ctx=cv.getContext('2d'),w=cv.width,h=cv.height,cell=w/W;
+ ctx.clearRect(0,0,w,h);ctx.fillStyle='#080a0b';ctx.fillRect(0,0,w,h);
+ for(let z=0;z<W;z++)for(let x=0;x<W;x++){
+   ctx.fillStyle=g[z][x]?'#34383a':'#a4a092';
+   ctx.fillRect(x*cell,z*cell,Math.ceil(cell),Math.ceil(cell));
+ }
+ // O minimapa mostra apenas os jogadores; a posição da criatura fica oculta para preservar o terror.
+ for(const id in MP.pl){const p=MP.pl[id];if(!p||p.x===undefined||p.st==='left'||p.st==='esc'||p.st==='dead')continue;
+   const x=(p.x/T)*cell,y=(p.z/T)*cell;ctx.fillStyle=hx(COL[id]||'#ffffff');ctx.beginPath();ctx.arc(x,y,id==MP.id?Math.max(4,cell*.48):Math.max(3,cell*.34),0,Math.PI*2);ctx.fill();
+   if(+id===MP.id){ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-Math.sin(p.yaw||0)*cell*1.1,y-Math.cos(p.yaw||0)*cell*1.1);ctx.stroke();}
+ }
+}
 function loop(t){requestAnimationFrame(loop);if(t-prev<1000/S.fps-2)return;const dt=Math.min(.05,(t-prev)/1000||0);prev=t;if(!G.lamps)return;if(state!='pause')T0+=dt;
 if(state=='menu'||state=='end'&&!P.x){camera.position.set(1.5*T,1.65,1.5*T);camera.rotation.set(0,(g[1][2]?PI:-PI/2)+Math.sin(T0*.15)*.35,0);P.mvv=false;FL.visible=false;GN.visible=false;hbS.visible=false;spot.intensity=1.1;spot.distance=24}
 if(state=='play'||state=='dying'){if(state=='play'){pUpdate(dt);events(dt);mech(dt);flUpdate(dt);gunUpdate(dt)}camUpdate(dt);hud(dt);audioUp(dt);
@@ -435,6 +455,6 @@ if(state=='play'){sv+=dt;if(sv>5&&!G.alarm&&!MP.on){sv=0;try{localStorage.setIte
 if(MP.on&&MP.go&&state!='menu')mpTick(dt);if(state=='spec')specUp(dt);if(state!='pause'){mUpdate(dt);prtUp(dt)}
 if(state=='dying'){G.dy+=dt;const d=Math.atan2(M.x-P.x,M.z-P.z);P.yaw+=wrap(PI+d-P.yaw)*Math.min(1,dt*6);P.pitch=lerp(P.pitch,.5,dt*3);camera.rotation.set(P.pitch,P.yaw,0);$('fade').style.opacity=Math.max(0,(G.dy-.8)/.8);
 if(G.dy>1.8&&MP.on){state='spec';show();$('fade').style.opacity=0;MP.sp=0}else if(G.dy>1.8){state='end';$('et').textContent='CAPTURADO';$('em').textContent=G.dm||'';$('bEr').textContent='Reiniciar';show('end');$('fade').style.opacity=0}}
-if(state!='pause')lampsUp(dt);renderer.render(scene,camera)}
+if(state!='pause')lampsUp(dt);drawMiniMap(dt);renderer.render(scene,camera)}
 build(Math.random()*1e9|0);P=newP();M.g.visible=false;requestAnimationFrame(loop);
 </script></body></html>
