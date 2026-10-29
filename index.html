@@ -45,10 +45,11 @@ input.code{font-size:22px;letter-spacing:.35em;padding-left:.35em;text-transform
 .av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#000;flex:none}
 .tg{font-size:10px;border:1px solid #6d685e;padding:1px 6px;margin-left:auto;opacity:.85;white-space:nowrap}
 /* ---- minimapa (só no multijogador) ---- */
-#mm{display:none;position:fixed;top:calc(env(safe-area-inset-top) + 10px);right:12px;width:min(32vw,130px);aspect-ratio:1;border-radius:50%;border:1px solid #4a463e;background:#050505;z-index:7;pointer-events:auto;box-shadow:0 0 14px #000;visibility:hidden}
+#mm{display:none;position:fixed;top:calc(env(safe-area-inset-top) + 10px);right:12px;left:auto;bottom:auto;height:auto;width:min(32vw,130px);aspect-ratio:1/1;border-radius:50%;border:1px solid #4a463e;background:#050505;z-index:7;pointer-events:auto;box-shadow:0 0 14px #000;visibility:hidden}
 body.mp #mm{display:block}
-#mm.big{top:50%;left:50%;right:auto;width:min(86vw,80vh);transform:translate(-50%,-50%);border-radius:10px;z-index:8}
-body.mp #bP{top:calc(env(safe-area-inset-top) + 150px)!important}
+@media (orientation:portrait){body.mp #bP{top:calc(env(safe-area-inset-top) + 150px)!important}}
+@media (orientation:landscape){#mm{right:auto;left:50%;transform:translateX(-50%);width:min(30vh,110px)}}
+#mm.big{top:50%;left:50%;right:auto;bottom:auto;width:min(86vw,80vh);transform:translate(-50%,-50%);border-radius:10px;z-index:8}
 </style></head><body>
 <canvas id="c"></canvas><canvas id="mm" width="200" height="200"></canvas><div id="vig"></div><div id="slit"></div><div id="fade"></div>
 <div id="hud"><div id="obj"></div><div id="inv"><span>Chave de Contenção</span><span>Fusível de Alta Tensão</span><span>Fragmento de Acesso</span></div><div id="bt"><b id="btt"></b><u><i id="bti"></i></u><span id="bts"></span></div><div id="pr"></div><div id="tt"></div><div id="sb"><i id="sbi"></i></div><div id="xh" class="cr"></div><div id="am" class="cr"></div><div id="mb" class="cr"><span>A CRIATURA</span><u><i id="mbi"></i></u></div></div>
