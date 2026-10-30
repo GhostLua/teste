@@ -388,7 +388,7 @@ loadPeer(()=>{
   const thisConn=conn;
   attemptTimer=setTimeout(()=>{if(!MP.on&&conn===thisConn){try{thisConn.close()}catch(_){};if(idx<targets.length)connectNext();else fail('Tempo esgotado. Atualize o jogo nos dois celulares; o anfitrião deve criar uma sala nova e enviar o código novamente.')}},12000);
   thisConn.on('open',()=>{if(finished)return;clearTimeout(attemptTimer);MP.hc=thisConn;MP.on=1;MP.host=0;MP.go=0;MP.code=code;send(thisConn,{t:'hi',name:nm()});mpSt('Conectado!')});
-  thisConn.on('data',cliMsg);
+  thisConn.on('data',d=>cliMsg(d));
   thisConn.on('error',e=>{if(!MP.on){clearTimeout(attemptTimer);if(idx<targets.length)connectNext();else fail('A conexão foi recusada. Confirme que o anfitrião está na sala e atualize o jogo nos dois celulares.')}});
   thisConn.on('close',()=>{if(MP.on)mpLeave('O anfitrião saiu ou a conexão caiu.')});
  }
@@ -498,7 +498,7 @@ build(Math.random()*1e9|0);P=newP();M.g.visible=false;requestAnimationFrame(loop
 (()=>{
 const RV={p:0,id:-1,c:0};
 const bpos=p=>({x:p.bx!==undefined?p.bx:p.x,z:p.bz!==undefined?p.bz:p.z});
-function rvTarget(){if(!MP.on||!MP.go||state!='play'||P.st!='alive'||P.hid>=0)return null;let b=null,bd=2.4;
+function rvTarget(){if(!MP.on||!MP.go||state!='play'||P.st!='alive'||P.hid>=0)return null;const tt=target();if(tt&&tt.kind=='l')return null;let b=null,bd=2.4;
 for(const id in MP.pl){const p=MP.pl[id];if(p===P||p.st!='dead')continue;const q=bpos(p);if(q.x===undefined)continue;const d=Math.hypot(q.x-P.x,q.z-P.z);if(d<bd){bd=d;b=p}}return b}
 function locRev(x,z){P.st='alive';P.bx=P.bz=undefined;P.x=x;P.z=z;P.hid=-1;P.hd=0;P.hT=0;P.pitch=0;P.stam=100;P.tired=false;P.mvv=false;P.grace=4;state='play';$('fade').style.opacity=0;show();lock();toast('Você foi revivido! Fuja!',3500)}
 function doRev(id){const p=MP.pl[id];if(!p||p.st!='dead')return;const b=bpos(p);p.st='alive';p.bx=p.bz=undefined;p.grace=4;
