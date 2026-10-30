@@ -157,17 +157,21 @@ const st=[[1,1]];g[1][1]=0;while(st.length){const[x,z]=st[st.length-1],nb=[[2,0]
 for(let i=0;i<N*N*.4;i++){const x=1+r()*(W-2)|0,z=1+r()*(W-2)|0;if(x%2!=z%2)g[z][x]=0}
 for(let k=0;k<7;k++){const x=3+2*(r()*(N-2)|0),z=3+2*(r()*(N-2)|0);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)g[z+b][x+a]=0}
 const b0=bfs(1,1);let ex=[1,1],bd=0;for(let z=1;z<W-1;z++)for(let x=1;x<W-1;x++)if(!g[z][x]&&x%2&&z%2&&(x==1||z==1||x==W-2||z==W-2)&&b0.d[z*W+x]>bd){bd=b0.d[z*W+x];ex=[x,z]}
-const dr=ex[0]==W-2?[W-1,ex[1]]:ex[1]==W-2?[ex[0],W-1]:ex[0]==1?[0,ex[1]]:[ex[0],0];g[dr[1]][dr[0]]=0;
+const dEx=bfs(ex[0],ex[1]).d;let dr=null,din=[0,0],bs=1e9;
+for(let z=1;z<W-1;z+=2)for(let x=1;x<W-1;x+=2){if(g[z][x]||(x==ex[0]&&z==ex[1]))continue;const e=x==1||x==W-2||z==1||z==W-2;if(!e||(x<5&&z<5))continue;const dd=dEx[z*W+x];if(dd<28)continue;const sc=Math.abs(dd-38);if(sc<bs){bs=sc;dr=x==1?[0,z]:x==W-2?[W-1,z]:z==1?[x,0]:[x,W-1];din=x==1?[1,0]:x==W-2?[-1,0]:z==1?[0,1]:[0,-1]}}
+if(!dr){dr=ex[0]==W-2?[W-1,ex[1]]:ex[1]==W-2?[ex[0],W-1]:ex[0]==1?[0,ex[1]]:[ex[0],0];din=[dr[0]==0?1:dr[0]==W-1?-1:0,dr[1]==0?1:dr[1]==W-1?-1:0]}
+g[dr[1]][dr[0]]=0;for(let k=1;k<=6;k++){const cx=dr[0]+din[0]*k,cz=dr[1]+din[1]*k;if(cx>0&&cz>0&&cx<W-1&&cz<W-1)g[cz][cx]=0}
+const dD=bfs(dr[0],dr[1]).d;
 const de=bfs(ex[0],ex[1]).d,d0=b0.d,mx=Math.max(...d0),grp=new THREE.Group(),reg=new Int8Array(W*W).fill(-1),open=[];
 const Wl=[[],[],[],[],[],[]],Fl=[[],[],[],[],[],[]],Wt=[];
-for(let z=0;z<W;z++)for(let x=0;x<W;x++)if(!g[z][x]){const i=z*W+x;reg[i]=de[i]>=0&&de[i]<=7?5:Math.min(4,d0[i]/mx*5|0);if(x<W-1&&z<W-1&&x>0&&z>0)open.push([x,z])}
+for(let z=0;z<W;z++)for(let x=0;x<W;x++)if(!g[z][x]){const i=z*W+x;reg[i]=(de[i]>=0&&de[i]<=7)||(dD[i]>=0&&dD[i]<=8)?5:Math.min(4,d0[i]/mx*5|0);if(x<W-1&&z<W-1&&x>0&&z>0)open.push([x,z])}
 for(let z=0;z<W;z++)for(let x=0;x<W;x++){const c=[(x+.5)*T,(z+.5)*T];if(!g[z][x]){const q=reg[z*W+x];Fl[q].push([c[0],0,c[1]]);if(q==2&&r()<.8)Wt.push([c[0],.04,c[1]])}
 else{let q=-1;for(let a=-1;a<=1&&q<0;a++)for(let b=-1;b<=1;b++){const X=x+a,Z=z+b;if(X>=0&&Z>=0&&X<W&&Z<W&&!g[Z][X]){q=reg[Z*W+X];break}}if(q>=0)Wl[q].push([c[0],H/2,c[1]])}}
 const M4=new THREE.Matrix4(),inst=(geo,m,l,y)=>{if(!l.length)return null;const im=new THREE.InstancedMesh(geo,m,l.length);l.forEach((p,i)=>{M4.makeTranslation(p[0],y??p[1],p[2]);im.setMatrixAt(i,M4)});grp.add(im);return im};
 for(let q=0;q<6;q++){inst(wallG,WM[q],Wl[q]);inst(flG,FM[q],Fl[q],0);inst(ceG,CM[q],Fl[q],H)}
 inst(new THREE.PlaneGeometry(T,T).rotateX(-PI/2),new THREE.MeshStandardMaterial({color:0x1d2a30,roughness:.05,metalness:.6,transparent:true,opacity:.7}),Wt);
 // luminárias
-const lamps=[];open.forEach(([x,z])=>{if(r()<.2||(x==1&&z==1)){const q=reg[z*W+x];lamps.push({x:(x+.5)*T,z:(z+.5)*T,q,fl:r()<.4,ph:r()*9,off:0,v:1,c:q==4?[1,.2,.15]:q==5?[.6,.8,1]:q==2?[.8,1,.9]:[1,.93,.8]})}});
+const lamps=[];open.forEach(([x,z])=>{if(r()<.2||(x==1&&z==1)||(dD[z*W+x]>=1&&dD[z*W+x]<=8&&dD[z*W+x]%3==0)){const q=reg[z*W+x];lamps.push({x:(x+.5)*T,z:(z+.5)*T,q,fl:r()<.4,ph:r()*9,off:0,v:1,c:q==4?[1,.2,.15]:q==5?[.6,.8,1]:q==2?[.8,1,.9]:[1,.93,.8]})}});
 const lm=new THREE.InstancedMesh(new THREE.BoxGeometry(1.4,.08,.3),new THREE.MeshBasicMaterial({color:0xffffff}),lamps.length);lamps.forEach((l,i)=>{M4.makeTranslation(l.x,H-.05,l.z);lm.setMatrixAt(i,M4);lm.setColorAt(i,new THREE.Color())});grp.add(lm);
 // canos e entulho
 const pipes=[],deb=[];open.forEach(([x,z])=>{const q=reg[z*W+x];if((q==1||q==3)&&r()<.3)pipes.push([(x+.5)*T,H-.45,(z+.5)*T]);if(q==1&&r()<.3)deb.push([(x+.3+r()*.4)*T,.12,(z+.3+r()*.4)*T])});
@@ -190,7 +194,7 @@ const ammos=[];[2,2,2,2,2,1].forEach((n,q)=>{const l=open.filter(([x,z])=>reg[z*
 // mecanismo de saída
 const ped=new THREE.Group(),ex0=(ex[0]+.5)*T,ez0=(ex[1]+.5)*T;ped.position.set(ex0,0,ez0);const pb=new THREE.Mesh(new THREE.BoxGeometry(Math.max(.8,Math.min(REQ,5)*.25+.1),REQ>5?1.5:1.2,.8),steel);pb.position.y=.6;ped.add(pb);
 const slots=Array.from({length:REQ},(_,i)=>i).map(i=>{const s=new THREE.Mesh(new THREE.BoxGeometry(.16,.16,.05),new THREE.MeshStandardMaterial({color:0x222222,emissive:0,emissiveIntensity:1}));s.position.set((i%5-(Math.min(REQ,5)-1)/2)*.25,1.1-(i/5|0)*.22,.41);ped.add(s);return s});grp.add(ped);obs.push({x:ex0,z:ez0,h:Math.max(.45,Math.min(REQ,5)*.125+.05)});
-const dx=dr[0]-ex[0],dz=dr[1]-ex[1],ds=new THREE.Mesh(new THREE.BoxGeometry(dx?.4:T,H,dx?T:.4),new THREE.MeshStandardMaterial({color:0x2a2e30,metalness:.8,roughness:.4,emissive:0x330000}));ds.position.set((dr[0]+.5)*T,H/2,(dr[1]+.5)*T);grp.add(ds);
+const dx=-din[0],dz=-din[1],ds=new THREE.Mesh(new THREE.BoxGeometry(dx?.4:T,H,dx?T:.4),new THREE.MeshStandardMaterial({color:0x2a2e30,metalness:.8,roughness:.4,emissive:0x330000}));ds.position.set((dr[0]+.5)*T,H/2,(dr[1]+.5)*T);grp.add(ds);
 const gl=new THREE.Mesh(new THREE.PlaneGeometry(T,H),new THREE.MeshBasicMaterial({color:0xdde8ff}));gl.position.set((dr[0]+.5)*T+dx*1.1,H/2,(dr[1]+.5)*T+dz*1.1);gl.rotation.y=dx?PI/2:0;grp.add(gl);
 scene.add(grp);
 G={grp,lamps,lm,lockers,items,bats,ammos,obs,ped:{x:ex0,z:ez0},slots,ds,door:{i:dr[0],j:dr[1],open:0,dx,dz,y:H/2},open,reg,d0,mx,alarm:false,ins:-1,ev:20,sa:0,sf:520,seed,lt:0,gotN:0,disc:new Uint8Array(W*W)};
@@ -268,10 +272,10 @@ function kill(){M.dead=true;M.deadT=0;M.state='dead';M.path=[];G.dist=99;tn(60,1
 // ---------- lanterna ----------
 function toggleFl(){if(P.hid>=0||P.rl>0)return;if(P.bat<=0&&!P.flash){toast('Sem bateria. Pressione B para trocar a pilha.',2500);return}P.flash=!P.flash;tn(1800,.03,.12,'square');nz(.03,3000,.2)}
 function reload(){if(P.hid>=0||P.rl>0)return;if(P.spare<1){toast('Você não tem pilhas.',2000);return}if(P.bat>=90){toast('A lanterna já está carregada.',2000);return}P.rl=1.5;P.rlk=false;nz(.08,2000,.25);tn(900,.05,.1,'square');P.nb=Math.max(P.nb,2)}
-function flUpdate(dt){
+function flUpdate(dt){P.bat=100;
 if(P.rl>0){P.rl-=dt;if(P.rl<.6&&!P.rlk){P.rlk=true;P.spare--;P.bat=Math.min(100,P.bat+60);P.flash=true;nz(.1,1500,.3);tn(1400,.06,.12,'square');toast('Pilha trocada.',1500)}if(P.rl<0)P.rl=0}
 const on=P.flash&&P.bat>0&&P.rl<=0&&P.hid<0;
-if(on){P.bat=Math.max(0,P.bat-.5*dt);if(P.bat<=0){P.flash=false;tn(150,.4,.2,'sawtooth');toast('A lanterna apagou. Pressione B para trocar a pilha.',3500)}}
+if(on){if(P.bat<=0){P.flash=false;tn(150,.4,.2,'sawtooth');toast('A lanterna apagou. Pressione B para trocar a pilha.',3500)}}
 let f=P.bat>30?1:Math.max(.2,P.bat/30);if(P.bat<20&&Math.random()<(20-P.bat)/50)f*=Math.random()<.5?0:.35;
 P.lf=on?f:0;spot.intensity=on?1.7*f:0;spot.distance=10+14*Math.min(1,P.bat/50);
 FLlens.color.setRGB(on?f:.08,on?.9*f:.08,on?.65*f:.08);FLcone.visible=on&&f>.1;FLcone.material.opacity=.035*f;FLled.color.set(P.bat>40?0x33ff66:P.bat>15?0xffaa22:0xff2222)}
@@ -280,8 +284,8 @@ function pUpdate(dt){const lk=P.hid>=0?G.lockers[P.hid]:null;
 if(lk){P.hT=Math.max(0,Math.min(1,P.hT+P.hd*dt*1.8));if(P.hd>0&&P.hT>=1)P.hd=0;if(P.hd<0&&P.hT<=0){P.hd=0;P.hid=-1;P.x=P.out.x;P.z=P.out.z}
 lk.pv.rotation.y=-Math.sin(P.hT*PI)*1.7;if(P.hT<1&&P.hd>0)P.yaw=lerp(P.yaw,lk.yaw,.1);P.noise=1;P.nb=Math.max(0,P.nb-dt*10)}
 else{const fw=(K.KeyW||K.ArrowUp?1:0)-(K.KeyS||K.ArrowDown?1:0)-joy.y,sd=(K.KeyD||K.ArrowRight?1:0)-(K.KeyA||K.ArrowLeft?1:0)+joy.x;let l=Math.hypot(fw,sd);const mv=l>.1;if(l>1){}const n=l>1?l:1,sy=Math.sin(P.yaw),cy=Math.cos(P.yaw);
-const run=(K.ShiftLeft||K.ShiftRight||P.run)&&mv&&P.stam>0&&!P.tired&&!P.crouch;if(P.stam<=0)P.tired=true;if(P.tired&&P.stam>25)P.tired=false;
-const sp=(P.crouch?1.6:run?5.4:3.2)*(P.tired?.7:1);P.stam=Math.max(0,Math.min(100,P.stam+(run?-16:mv?8:18)*dt));
+P.stam=100;P.tired=false;const run=(K.ShiftLeft||K.ShiftRight||P.run)&&mv&&P.stam>0&&!P.tired&&!P.crouch;if(P.stam<=0)P.tired=true;if(P.tired&&P.stam>25)P.tired=false;
+const sp=(P.crouch?1.6:run?5.4:3.2)*(P.tired?.7:1);P.stam=100;
 if(mv){const vx=(-sy*fw+cy*sd)/n,vz=(-cy*fw-sy*sd)/n;let nx=P.x+vx*sp*dt;if(!solid(nx,P.z,.35))P.x=nx;let nz_=P.z+vz*sp*dt;if(!solid(P.x,nz_,.35))P.z=nz_;P.bob+=dt*sp*1.9;P.step+=sp*dt;
 const wet=G.reg[Math.floor(P.z/T)*W+Math.floor(P.x/T)]==2;if(P.step>(run?1.5:2.1)){P.step=0;wet?(nz(.14,1800,.2*(P.crouch?.4:1)),tn(300,.08,.05,'sine')):nz(.07,520,.16*(P.crouch?.35:1))}P.wet=wet}
 P.noise=Math.max(!mv?.5:P.crouch?2.5:run?16:8,P.nb)+(mv&&P.wet?4:0);P.nb=Math.max(0,P.nb-dt*12);P.mvv=mv;P.runv=run}
@@ -345,9 +349,9 @@ if(P.tired||P.stam<25){P.br-=dt;if(P.br<=0){P.br=1.1-(P.tired?.4:0);nz(.5,1400,.
 if(G.alarm){G.sa-=dt;if(G.sa<=0){G.sa=.7;G.sf=G.sf==520?700:520;tn(G.sf,.6,.1,'square')}}}
 function hud(dt){const t=state=='play'?target():null;let s='';if(P.hid>=0)s=P.hT>=1?'E — Sair do armário':'';else if(t){if(t.kind=='a')s='E — Pegar munição';else if(t.kind=='b')s='E — Pegar pilha';else if(t.kind=='i')s='E — Pegar';else if(t.kind=='l')s='E — Esconder-se';else s=cnt()<REQ?'Mecanismo ('+cnt()+'/'+REQ+')':G.alarm?'':'E — Instalar componentes'}
 $('pr').textContent=s;$('obj').textContent=G.alarm?'CORRA para a saída.':cnt()<REQ?'Encontre os componentes ('+cnt()+'/'+REQ+')':'Encontre a saída e instale os componentes';
-[...$('inv').children].forEach((e,i)=>e.className=P.items[i]?'on':'');$('sb').style.opacity=P.stam<99?.8:0;$('sbi').style.width=P.stam+'%';$('vig').style.opacity=.45+(G.fear||0)*.5;$('btt').textContent='Lanterna '+Math.round(P.bat)+'%';$('bti').style.width=P.bat+'%';$('bti').style.background=P.bat<20?'#8a1c1c':'#c9b27a';$('bts').textContent='Pilhas: '+P.spare;if(CAR()){$('am').textContent='Pistola '+P.mag+' / '+P.ammo;const v=!M.dead&&M.barT>0;$('mb').style.opacity=v?1:0;$('mbi').style.width=Math.max(0,M.hp/M.max*100)+'%';hbS.visible=v;hbS.position.set(M.x,3.3,M.z);if(v)hbDraw()}else hbS.visible=false}
+[...$('inv').children].forEach((e,i)=>e.className=P.items[i]?'on':'');$('sb').style.opacity=P.stam<99?.8:0;$('sbi').style.width=P.stam+'%';$('vig').style.opacity=.45+(G.fear||0)*.5;$('btt').textContent='Lanterna '+Math.round(P.bat)+'%';$('bti').style.width=P.bat+'%';$('bti').style.background=P.bat<20?'#8a1c1c':'#c9b27a';$('bts').textContent='Bateria infinita';if(CAR()){$('am').textContent='Pistola '+P.mag+' / '+P.ammo;const v=!M.dead&&M.barT>0;$('mb').style.opacity=v?1:0;$('mbi').style.width=Math.max(0,M.hp/M.max*100)+'%';hbS.visible=v;hbS.position.set(M.x,3.3,M.z);if(v)hbDraw()}else hbS.visible=false}
 function mech(dt){if(G.ins<0)return;G.ins+=dt;G.slots.forEach((s,i)=>{if(G.ins>.6*i+.3&&!s.on){s.on=1;s.material.emissive.setHex(0x44ff88);tn(500+i*200,.3,.2,'square')}});
-if(G.ins>2.4&&!G.alarm){G.alarm=true;toast('O ALARME DISPAROU. CORRA!',4000);roar();G.at=0}
+if(G.ins>2.4&&!G.alarm){G.alarm=true;toast('O ALARME DISPAROU! A saída abriu no fim do corredor iluminado, longe do mecanismo. CORRA!',5500);roar();G.at=0}
 if(G.alarm){G.door.open=Math.min(1,G.door.open+dt/3);G.ds.position.y=G.door.y-G.door.open*(H-.1);if(G.door.open<1&&Math.random()<.1)nz(.2,200,.4)}}
 
 // ---------- multijogador (PeerJS / WebRTC) ----------
